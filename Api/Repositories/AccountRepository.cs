@@ -50,14 +50,19 @@ namespace Store.Repositories
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<IdentityResult> SignUpAsync(SignUpModel model)
+        public async Task<UserModel> SignUpAsync(SignUpModel model)
         {
             var user = new UserModel
             {
                 UserName = model.UserName,
                 Email = model.Email,
             };
-            return await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                return user;
+            }
+            return new UserModel();
         }
     }
 }

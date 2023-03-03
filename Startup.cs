@@ -63,6 +63,13 @@ namespace Store
                 .AddEntityFrameworkStores<MyStoreContext>()
                 .AddDefaultTokenProviders();
 
+
+
+            // .AddTokenProvider<EmailTokenProvider<UserModel>>("emailconfirmation");
+            //Email Token life time
+            //services.Configure<EmailT>(opt =>
+            // opt.TokenLifespan = TimeSpan.FromDays(3));
+
             // Truy cập IdentityOptions
             services.Configure<IdentityOptions>(options =>
             {
@@ -85,8 +92,11 @@ namespace Store
                 options.User.RequireUniqueEmail = true;  // Email là duy nhất
 
                 // Cấu hình đăng nhập.
-                options.SignIn.RequireConfirmedEmail = false;            // Cấu hình xác thực địa chỉ email (email phải tồn tại)
+                options.SignIn.RequireConfirmedEmail = true;            // Cấu hình xác thực địa chỉ email (email phải tồn tại)
                 options.SignIn.RequireConfirmedPhoneNumber = false;     // Xác thực số điện thoại
+                //
+                //
+                //options.Tokens.EmailConfirmationTokenProvider = "emailconfirmation";
 
             });
 
@@ -119,7 +129,7 @@ namespace Store
             // Mail
             var mailSetting = _configuration.GetSection("MailSettings");
             services.Configure<MailSettings>(mailSetting);
-            services.AddSingleton<IEmailSender, SendMailService>();
+            services.AddSingleton<IEmailSender, MailService>();
 
             services.ConfigureApplicationCookie(options =>
             {

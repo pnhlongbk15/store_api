@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CSharp.RuntimeBinder;
 using Store.Models;
@@ -14,11 +15,12 @@ namespace Store.Controllers
     {
         private readonly ILogger<AddressController> _logger;
         private readonly MyStoreContext _storeContext;
-
-        public AddressController(ILogger<AddressController> logger, MyStoreContext storeContext)
+        UserManager<UserModel> _userManager;
+        public AddressController(ILogger<AddressController> logger, MyStoreContext storeContext, UserManager<UserModel> userManager)
         {
             _logger = logger;
             _storeContext = storeContext;
+            _userManager = userManager;
         }
 
         // GET api/<AddressController>/userId
@@ -54,29 +56,46 @@ namespace Store.Controllers
 
         // POST api/<AddressController>/add
         [HttpPost("add")]
-        public JsonResult AddOne(dynamic dAddress)
+        public ObjectResult AddOne(dynamic dAddress)
         {
             try
             {
-                dAddress.Id = Guid.NewGuid().ToString();
-                var mAddress = new AddressModel();
-                mAddress.SetValues(dAddress);
-
-                _storeContext.Address.Add(mAddress);
-                var numOfRE = _storeContext.SaveChanges();
-
-                if (numOfRE != 0)
+                var id = dAddress.UserId.ToString();
+                var user = _userManager.FindByIdAsync(id);
+                if (user.Result != null)
                 {
-                    return new JsonResult(new { status = "success", message = "Add successful." });
+                    dAddress.Id = Guid.NewGuid().ToString();
+                    var mAddress = new AddressModel();
+                    mAddress.SetValues(dAddress);
+
+                    _storeContext.Address.Add(mAddress);
+                    var numOfRE = _storeContext.SaveChanges();
+
+                    if (numOfRE != 0)
+                    {
+                        return StatusCode(201, new JsonResult(new { status = "success", message = "Add successful." }));
+                    }
+                    else
+                    {
+                        return StatusCode(501, new JsonResult(new { status = "fail", message = "Add fail." }));
+                    }
+
                 }
                 else
                 {
-                    return new JsonResult(new { status = "fail", message = "Add fail." });
+                    return StatusCode(404, new JsonResult(
+                        new { status = "fail", message = "User does not exist." }
+                    ));
                 }
+
             }
             catch (RuntimeBinderException ex)
             {
-                return new JsonResult(new { status = "error", message = ex.Message });
+                return StatusCode(500, new JsonResult(new
+                {
+                    status = "error",
+                    message = ex.Message
+                }));
             }
         }
 
@@ -84,7 +103,10 @@ namespace Store.Controllers
         [HttpPut("{id}")]
         public void Update(string id)
         {
-            try { }
+            try
+            {
+
+            }
             catch (Exception ex) { }
         }
 

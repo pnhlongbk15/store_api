@@ -16,15 +16,15 @@ namespace Store.Services
 
     }
 
-    public class SendMailService : IEmailSender
+    public class MailService : IEmailSender
     {
         private readonly MailSettings mailSettings;
 
-        private readonly ILogger<SendMailService> logger;
+        private readonly ILogger<MailService> logger;
 
         // mailSetting được Inject qua dịch vụ hệ thống
         // Có inject Logger để xuất log
-        public SendMailService(IOptions<MailSettings> _mailSettings, ILogger<SendMailService> _logger)
+        public MailService(IOptions<MailSettings> _mailSettings, ILogger<MailService> _logger)
         {
             mailSettings = _mailSettings.Value;
             logger = _logger;
