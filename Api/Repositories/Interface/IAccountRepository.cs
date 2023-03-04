@@ -4,7 +4,7 @@ namespace Store.Repositories
 {
     public interface IAccountRepository
     {
-        public Task<UserModel> SignUpAsync(SignUpModel model);
+        public Task<dynamic> SignUpAsync(SignUpModel model);
         public Task<string> SignInAsync(SignInModel model);
     }
 }

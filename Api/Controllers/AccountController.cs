@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Store.Models;
 using Store.Repositories;
+using Store.Utils;
 
 namespace Store.Controllers
 {
@@ -24,48 +25,42 @@ namespace Store.Controllers
         public async Task<IActionResult> SignUp(SignUpModel model)
         {
 
-            UserModel user = await _accountRepo.SignUpAsync(model);
+            var user = await _accountRepo.SignUpAsync(model);
 
-
-            if (user.Id != null)
+            if (String.IsNullOrEmpty(user))
             {
-                // generation of the email token
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-                var confirmLink = Url.Action(nameof(ConfirmEmail), "Account", new { userId = user.Id, token }, Request.Scheme);
-                //var callback_url = Request.Scheme + "://" + Request.Host + confirmLink;
-
-                var email_body = "Please click here: <a href=\"#URL#\">Click here.</a>";
-
-                var body = email_body.Replace("#URL#", confirmLink);
-
-                await _mailService.SendEmailAsync(user.Email, "auth", body);
-                return Ok(user);
+                return BadRequest(ErrorSignUp.GetMessage());
             }
 
-            return Unauthorized();
+            // generation of the email token
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var confirmLink = Url.Action(nameof(ConfirmEmail), nameof(AccountController), new { userId = user.Id, token }, Request.Scheme);
+            //var callback_url = Request.Scheme + "://" + Request.Host + confirmLink;
+            var email_body = "Please click here: <a href=\"#URL#\">Click here.</a>";
+            var body = email_body.Replace("#URL#", confirmLink);
+
+            await _mailService.SendEmailAsync(user.Email, "auth", body);
+            return Ok(user);
         }
 
         [HttpPost("signin")]
         public async Task<IActionResult> SignIn(SignInModel model)
         {
-            var isConfirmEmail = (await _userManager.FindByNameAsync(model.UserName)).EmailConfirmed;
+            var user = await _userManager.FindByNameAsync(model.UserName);
 
-            if (isConfirmEmail)
+            if (user == null)
             {
-                var result = await _accountRepo.SignInAsync(model);
-
-                if (string.IsNullOrEmpty(result))
-                {
-                    return Unauthorized();
-                }
-                return Ok(result);
-
+                return BadRequest("User does not exist.");
             }
-            else
+
+            var result = await _accountRepo.SignInAsync(model);
+
+            if (string.IsNullOrEmpty(result))
             {
-                return BadRequest("Please confirm email.");
+                return Unauthorized("Please confirm email.");
             }
+            return Ok(result);
         }
 
         [HttpGet]
@@ -78,7 +73,7 @@ namespace Store.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return BadRequest("Invalid email parameter.");
+                return BadRequest("Please try again later.");
             }
 
             //token = Encoding.UTF8.GetString(Convert.FromBase64String(token));

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Store.Models;
+using Store.Utils;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -21,8 +22,6 @@ namespace Store.Repositories
         }
         public async Task<string> SignInAsync(SignInModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.UserName);
-            Console.WriteLine(user);
             var result = await _signInManager.PasswordSignInAsync
                         (model.UserName, model.Password, false, false);
 
@@ -46,11 +45,10 @@ namespace Store.Repositories
                     signingCredentials: new SigningCredentials(authenKey,
                                             SecurityAlgorithms.HmacSha512Signature)
                     );
-
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<UserModel> SignUpAsync(SignUpModel model)
+        public async Task<dynamic> SignUpAsync(SignUpModel model)
         {
             var user = new UserModel
             {
@@ -58,11 +56,16 @@ namespace Store.Repositories
                 Email = model.Email,
             };
             var result = await _userManager.CreateAsync(user, model.Password);
+
+            Console.WriteLine(result);
             if (result.Succeeded)
             {
                 return user;
             }
-            return new UserModel();
+            ErrorSignUp.Messages = null;
+            ErrorSignUp.Messages = result.Errors.ToList();
+
+            return String.Empty;
         }
     }
 }

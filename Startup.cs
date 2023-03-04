@@ -25,6 +25,12 @@ namespace Store
         {
             services.AddOptions();
 
+            //Swagger 
+            services.AddSwaggerGen();
+            // Controller
+            services.AddControllers();
+            //services.AddControllersWithViews();
+
             //Cors
             services.AddCors(configs =>
             {
@@ -41,9 +47,6 @@ namespace Store
                 optionsBuilder.UseMySQL(connectString);
             });
 
-            // Controller
-            services.AddControllers();
-            services.AddControllersWithViews();
 
             // Json Serialize
             services
@@ -122,14 +125,19 @@ namespace Store
                         )
                 };
             });
-            // Middleware
-            // services.AddTransient<CheckUserMiddleware, CheckUserMiddleware>();
-            services.AddScoped<IAccountRepository, AccountRepository>();
 
             // Mail
             var mailSetting = _configuration.GetSection("MailSettings");
             services.Configure<MailSettings>(mailSetting);
             services.AddSingleton<IEmailSender, MailService>();
+
+            // Middleware
+            // services.AddTransient<CheckUserMiddleware, CheckUserMiddleware>();
+
+            // Repository
+            services.AddScoped<IAccountRepository, AccountRepository>();
+
+
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -141,7 +149,11 @@ namespace Store
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
+            if (env.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
             // Cors
             app.UseCors(configs => configs.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
