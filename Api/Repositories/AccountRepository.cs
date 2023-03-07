@@ -65,7 +65,7 @@ namespace Store.Repositories
             ErrorSignUp.Messages = null;
             ErrorSignUp.Messages = result.Errors.ToList();
 
-            return String.Empty;
+            return null;
         }
     }
 }

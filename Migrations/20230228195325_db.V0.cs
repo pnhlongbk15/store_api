@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using MySql.EntityFrameworkCore.Metadata;
 
 #nullable disable
@@ -346,6 +345,8 @@ namespace StoreApi.Migrations
                 table: "Users",
                 column: "NormalizedUserName",
                 unique: true);
+
+
         }
 
         /// <inheritdoc />

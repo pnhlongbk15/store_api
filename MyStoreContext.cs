@@ -5,6 +5,7 @@ using Store.Services;
 
 namespace Store
 {
+
     public class MyStoreContext : IdentityDbContext<UserModel>
     {
         public DbSet<AddressModel> Address { get; set; }
@@ -17,11 +18,6 @@ namespace Store
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseLoggerFactory(LoggerService.Factory);
-        }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -36,5 +32,14 @@ namespace Store
             }
 
         }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseLoggerFactory(LoggerService.Factory);
+            Console.WriteLine("OnConfiguring");
+
+        }
+
     }
 }

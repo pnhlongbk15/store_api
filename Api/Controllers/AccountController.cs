@@ -27,7 +27,7 @@ namespace Store.Controllers
 
             var user = await _accountRepo.SignUpAsync(model);
 
-            if (String.IsNullOrEmpty(user))
+            if (user == null)
             {
                 return BadRequest(ErrorSignUp.GetMessage());
             }
@@ -41,7 +41,7 @@ namespace Store.Controllers
             var body = email_body.Replace("#URL#", confirmLink);
 
             await _mailService.SendEmailAsync(user.Email, "auth", body);
-            return Ok(user);
+            return Ok(new { UserName = user.UserName, Email = user.Email });
         }
 
         [HttpPost("signin")]

@@ -40,14 +40,6 @@ namespace Store
                 );
             });
 
-            //  Database
-            services.AddDbContext<MyStoreContext>(optionsBuilder =>
-            {
-                var connectString = _configuration.GetConnectionString("MyStore");
-                optionsBuilder.UseMySQL(connectString);
-            });
-
-
             // Json Serialize
             services
                 .AddControllersWithViews()
@@ -60,13 +52,19 @@ namespace Store
                     options =>
                         options.SerializerSettings.ContractResolver = new DefaultContractResolver()
                 );
+
+            //  Database
+
+            services.AddDbContext<MyStoreContext>(options =>
+            {
+                options.UseMySQL(FilterConnectionString.ConnectionString());
+            });
+
             // Identity
             services
                 .AddIdentity<UserModel, IdentityRole>()
                 .AddEntityFrameworkStores<MyStoreContext>()
                 .AddDefaultTokenProviders();
-
-
 
             // .AddTokenProvider<EmailTokenProvider<UserModel>>("emailconfirmation");
             //Email Token life time
@@ -149,6 +147,8 @@ namespace Store
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // app.UseMiddleware<DatabaseCheckMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
